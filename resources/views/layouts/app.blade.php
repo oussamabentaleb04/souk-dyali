@@ -10,7 +10,15 @@
 <nav class="navbar navbar-expand-lg bg-black border-bottom border-secondary">
     <div class="container">
         <a class="navbar-brand fw-bold" href="{{ route('home') }}">🛍️ Souk Dyali</a>
-        <div class="d-flex gap-2 align-items-center ms-auto">
+                <div class="d-flex gap-3 me-auto ms-4">
+            <a class="nav-link text-light" href="{{ route('catalog.index') }}">Shop</a>
+            @auth
+                @if(auth()->user()->role === 'seller')
+                    <a class="nav-link text-light" href="{{ route('seller.products.index') }}">My products</a>
+                @endif
+            @endauth
+        </div>
+        <div class="d-flex gap-2 align-items-center">
             @auth
                 <span class="text-secondary small">{{ auth()->user()->name }} ({{ auth()->user()->role }})</span>
                 <a class="btn btn-sm btn-outline-light" href="{{ route('dashboard') }}">Dashboard</a>

@@ -1,13 +1,20 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SellerApplicationController;
+use App\Http\Controllers\SellerProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('home');
+    return redirect()->route('catalog.index');
 })->name('home');
+
+// Public catalog
+Route::get('/shop', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/shop/product/{product}', [CatalogController::class, 'show'])->name('catalog.show');
+Route::get('/shop/seller/{sellerProfile}', [CatalogController::class, 'shop'])->name('catalog.shop');
 
 // Only for visitors who are NOT logged in
 Route::middleware('guest')->group(function () {
@@ -32,6 +39,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/seller/apply', [SellerApplicationController::class, 'create'])->name('seller.apply');
     Route::post('/seller/apply', [SellerApplicationController::class, 'store'])->name('seller.apply.store');
+
+    Route::middleware('role:seller')->prefix('seller')->name('seller.')->group(function () {
+        Route::resource('products', SellerProductController::class)->except(['show']);
+    });
 
     Route::get('/admin', [DashboardController::class, 'admin'])
         ->name('admin.dashboard')
