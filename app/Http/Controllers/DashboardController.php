@@ -49,8 +49,25 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function admin()
+       public function admin()
     {
+        // Orders per day, last 14 days
+        $days = collect(range(13, 0))->map(fn ($i) => now()->subDays($i)->toDateString());
+        $perDay = Order::where('created_at', '>=', now()->subDays(13)->startOfDay())
+            ->get()
+            ->groupBy(fn ($o) => $o->created_at->toDateString())
+            ->map->count();
+
+        // Revenue by category (delivered orders only)
+        $revenueByCategory = \Illuminate\Support\Facades\DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('products', 'products.id', '=', 'order_items.product_id')
+            ->join('categories', 'categories.id', '=', 'products.category_id')
+            ->where('orders.status', 'delivered')
+            ->selectRaw('categories.name, sum(order_items.subtotal) as total')
+            ->groupBy('categories.name')
+            ->pluck('total', 'name');
+
         return view('dashboards.admin', [
             'usersCount' => User::count(),
             'sellersCount' => SellerProfile::where('status', 'approved')->count(),
@@ -58,6 +75,10 @@ class DashboardController extends Controller
             'productsCount' => Product::count(),
             'ordersCount' => Order::count(),
             'revenue' => (float) Order::where('status', 'delivered')->sum('total'),
+            'chartLabelsDays' => $days->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d M'))->values(),
+            'chartOrdersPerDay' => $days->map(fn ($d) => $perDay->get($d, 0))->values(),
+            'chartCategoryLabels' => $revenueByCategory->keys(),
+            'chartCategoryValues' => $revenueByCategory->values(),
         ]);
     }
 }
