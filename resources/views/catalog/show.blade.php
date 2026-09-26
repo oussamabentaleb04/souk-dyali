@@ -26,13 +26,15 @@
         <p>{{ $product->description }}</p>
         <p class="small text-secondary">{{ $product->stock }} in stock</p>
 
-        @auth
+                @auth
             @if(auth()->user()->role === 'buyer' && $product->stock > 0)
-                <form method="POST" action="#" class="d-flex gap-2">
+                <form method="POST" action="{{ route('cart.add', $product) }}" class="d-flex gap-2">
                     @csrf
                     <input type="number" name="quantity" value="1" min="1" max="{{ $product->stock }}" class="form-control" style="width: 100px;">
-                    <button class="btn btn-primary" disabled title="Cart coming in the next phase">Add to cart</button>
+                    <button class="btn btn-primary">Add to cart</button>
                 </form>
+            @elseif(auth()->user()->role === 'buyer')
+                <p class="text-danger">Out of stock</p>
             @endif
         @else
             <a href="{{ route('login') }}" class="btn btn-outline-light">Login to buy</a>

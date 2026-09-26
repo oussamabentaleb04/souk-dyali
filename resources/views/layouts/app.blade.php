@@ -13,8 +13,13 @@
                 <div class="d-flex gap-3 me-auto ms-4">
             <a class="nav-link text-light" href="{{ route('catalog.index') }}">Shop</a>
             @auth
-                @if(auth()->user()->role === 'seller')
+                                @if(auth()->user()->role === 'seller')
                     <a class="nav-link text-light" href="{{ route('seller.products.index') }}">My products</a>
+                    <a class="nav-link text-light" href="{{ route('seller.orders.index') }}">My orders</a>
+                @endif
+                @if(auth()->user()->role === 'buyer')
+                    <a class="nav-link text-light" href="{{ route('cart.index') }}">Cart</a>
+                    <a class="nav-link text-light" href="{{ route('orders.index') }}">My orders</a>
                 @endif
             @endauth
         </div>
